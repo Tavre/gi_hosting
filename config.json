@@ -1,0 +1,7 @@
+{
+  "githubUser": "USER",
+  "githubRepo": "REPO",
+  "githubToken": "TOKEN",
+  "githubBranch": "main",
+  "imagePath": "images"
+} 

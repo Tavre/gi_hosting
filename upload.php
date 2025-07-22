@@ -13,12 +13,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// GitHub 配置信息
-// !!! 请替换为您的实际信息 !!!
-$githubUser = 'user'; // 您的 GitHub 用户名
-$githubRepo = 'repository'; // 您的 GitHub 仓库名
-$githubToken = 'token'; // 您的 GitHub 个人访问令牌
-$githubBranch = 'main'; // 您的仓库分支，通常是 main 或 master
+// 从 config.json 读取配置
+$configFilePath = __DIR__ . '/config.json';
+if (!file_exists($configFilePath)) {
+    echo json_encode(['success' => false, 'message' => 'config.json 文件不存在。请确保已正确配置。']);
+    exit();
+}
+$config = json_decode(file_get_contents($configFilePath), true);
+
+if (json_last_error() !== JSON_ERROR_NONE) {
+    echo json_encode(['success' => false, 'message' => 'config.json 文件解析失败。请检查 JSON 格式。']);
+    exit();
+}
+
+$githubUser = $config['githubUser'] ?? null;
+$githubRepo = $config['githubRepo'] ?? null;
+$githubToken = $config['githubToken'] ?? null;
+$githubBranch = $config['githubBranch'] ?? null;
+$imagePath = $config['imagePath'] ?? null;
+
+// 检查必要的配置项是否存在
+if (!$githubUser || !$githubRepo || !$githubToken || !$githubBranch || !$imagePath) {
+    echo json_encode(['success' => false, 'message' => 'config.json 中缺少必要的 GitHub 配置信息（githubUser, githubRepo, githubToken, githubBranch, imagePath）。']);
+    exit();
+}
 
 // 检查是否是 POST 请求
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -44,7 +62,7 @@ $filename = basename($filename);
 
 // 构建 GitHub API URL
 // 图片将上传到仓库的根目录，您可以根据需要修改路径
-$pathInRepo = 'images/' . $filename; // 例如，上传到 images 文件夹下
+$pathInRepo = $imagePath . '/' . $filename; // 例如，上传到 images 文件夹下
 $githubApiUrl = "https://api.github.com/repos/{$githubUser}/{$githubRepo}/contents/{$pathInRepo}";
 
 // 构建请求体
