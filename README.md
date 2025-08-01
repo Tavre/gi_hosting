@@ -63,6 +63,36 @@
    - 建议不要将 Token 暴露在公网环境，生产环境请用更安全的配置方式。
    - 如遇 SSL 证书报错，请参考 README 前部“准备工作”说明配置 CA 证书。
 
+---
+
+### 方案二：一键部署到 Vercel
+
+1. **Fork 本仓库**
+   - 打开本项目的 GitHub 页面，点击右上角的 “Fork” 按钮，将项目复制到你的 GitHub 账号下。
+2. **修改配置**
+   - 在你的 Fork 仓库中，编辑 `upload.php` 文件，将 `$githubUser`、`$githubRepo`、`$githubToken`、`$githubBranch` 等变量替换为你自己的信息。
+   - 推荐将 Token 配置为 Vercel 的环境变量，避免泄露。
+3. **登录并授权 Vercel**
+   - 访问 [https://vercel.com/](https://vercel.com/) 并用 GitHub 账号登录。
+   - 点击 “Add New Project”，选择你刚刚 Fork 的仓库。
+4. **配置环境变量**
+   - 在 Vercel 项目设置中，找到 “Environment Variables”。
+   - 新增如下环境变量：
+     - `GITHUB_USER`：你的 GitHub 用户名
+     - `GITHUB_REPO`：你的图床仓库名
+     - `GITHUB_TOKEN`：你的 GitHub Token（需有 repo 权限）
+     - `GITHUB_BRANCH`：主分支名（如 main 或 master）
+   - 在 `upload.php` 中，你需要修改代码以从环境变量中读取这些变量，而不是从 `config.json` 中读取。例如，将 `$githubUser = $config['githubUser'] ?? getenv('GITHUB_USER');` 修改为 `$githubUser = getenv('GITHUB_USER');`。同时，你还需要在 `upload.php` 中添加对 `config.json` 文件不存在或解析失败的错误处理。
+5. **部署项目**
+   - 在 Vercel 仪表盘点击 “Deploy” 或 “重新部署” 按钮。
+   - 部署完成后，Vercel 会分配一个公开访问的 URL（如 `https://your-project.vercel.app`）。
+6. **访问和测试**
+   - 在浏览器中访问 Vercel 分配的 URL，正常使用上传和画廊功能。
+   - 如遇上传失败，请检查环境变量、Token 权限、PHP 运行环境等。
+7. **注意事项**
+   - Vercel 默认只支持静态前端和 Node.js Serverless 后端。如果你需要 PHP 后端支持，可以用 [vercel-php](https://github.com/vercel-community/php) 或将 `upload.php` 改写为 Node.js 版本。
+   - 推荐将敏感信息（如 Token）全部用环境变量管理，避免泄露。
+   - 若需自定义域名，可在 Vercel 仪表盘绑定。
 
 ## 画廊页面说明
 - gallery.html 会自动从 GitHub 仓库 images 目录获取所有图片，通过 jsDelivr CDN 展示缩略图
